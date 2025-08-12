@@ -8,6 +8,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import SignupScreen from './src/screens/SignupScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ChatScreen from './src/screens/ChatScreen';
+import HomeScreen from './src/screens/HomeScreen';
 import { theme } from './src/theme/theme';
 
 const Stack = createNativeStackNavigator();
@@ -37,6 +38,15 @@ function RootNavigator() {
           </>
         ) : (
           <>
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{
+                headerTitle: 'Home',
+                headerStyle: { backgroundColor: theme.colors.background },
+                headerTintColor: theme.colors.primary,
+              }}
+            />
             <Stack.Screen
               name="Chat"
               component={ChatScreen}

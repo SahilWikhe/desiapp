@@ -1,51 +1,57 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from './AuthContext';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 const ChatContext = createContext(null);
 
+// In-memory chat model: conversations + messages per conversation
 export function ChatProvider({ children }) {
-  const [messages, setMessages] = useState([]);
-  const { user } = useAuth();
+  const [conversations, setConversations] = useState([
+    { id: 'c1', title: 'General', updatedAt: new Date().toISOString(), lastMessage: 'Welcome to the chat!' },
+    { id: 'c2', title: 'Support', updatedAt: new Date().toISOString(), lastMessage: 'How can we help you today?' },
+  ]);
 
-  useEffect(() => {
-    const load = async () => {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('id, content, sender_id, created_at')
-        .order('created_at', { ascending: true })
-        .limit(200);
-      if (!error && data) {
-        setMessages(
-          data.map(m => ({ id: m.id, text: m.content, createdAt: m.created_at, userId: m.sender_id }))
-        );
-      }
-    };
-    load();
+  const [messagesByConversationId, setMessagesByConversationId] = useState({
+    c1: [
+      { id: 'm1', text: 'Welcome to the chat!', createdAt: new Date().toISOString(), userId: 'system' },
+    ],
+    c2: [
+      { id: 'm2', text: 'How can we help you today?', createdAt: new Date().toISOString(), userId: 'system' },
+    ],
+  });
 
-    const channel = supabase
-      .channel('public:messages')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-        const m = payload.new;
-        setMessages(prev => [
-          ...prev,
-          { id: m.id, text: m.content, createdAt: m.created_at, userId: m.sender_id },
-        ]);
-      })
-      .subscribe();
+  const getMessages = useCallback((conversationId) => {
+    return messagesByConversationId[conversationId] || [];
+  }, [messagesByConversationId]);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+  const sendMessage = useCallback((conversationId, text, userId) => {
+    const trimmed = text?.trim();
+    if (!trimmed) return;
+    setMessagesByConversationId(prev => {
+      const existing = prev[conversationId] || [];
+      const nextMessage = {
+        id: `${conversationId}-${existing.length + 1}`,
+        text: trimmed,
+        createdAt: new Date().toISOString(),
+        userId,
+      };
+      const next = { ...prev, [conversationId]: [...existing, nextMessage] };
+      return next;
+    });
+    setConversations(prev => {
+      const updated = prev.map(c => c.id === conversationId ? {
+        ...c,
+        lastMessage: trimmed,
+        updatedAt: new Date().toISOString(),
+      } : c);
+      // sort by updatedAt desc
+      return updated.slice().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    });
   }, []);
 
-  const sendMessage = useCallback(async (text) => {
-    const trimmed = text?.trim();
-    if (!trimmed || !user?.id) return;
-    await supabase.from('messages').insert({ content: trimmed, sender_id: user.id });
-  }, [user?.id]);
-
-  const value = useMemo(() => ({ messages, sendMessage }), [messages, sendMessage]);
+  const value = useMemo(() => ({
+    conversations,
+    getMessages,
+    sendMessage,
+  }), [conversations, getMessages, sendMessage]);
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

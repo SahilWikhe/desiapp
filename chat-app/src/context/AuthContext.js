@@ -1,53 +1,29 @@
-import React, { createContext, useContext, useMemo, useState, useCallback, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import React, { createContext, useContext, useMemo, useState, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({ id: session.user.id, name: session.user.user_metadata?.name || session.user.email?.split('@')[0], email: session.user.email });
-      } else {
-        setUser(null);
-      }
-    });
-
-    // hydrate current session
-    supabase.auth.getSession().then(({ data }) => {
-      const session = data.session;
-      if (session?.user) {
-        setUser({ id: session.user.id, name: session.user.user_metadata?.name || session.user.email?.split('@')[0], email: session.user.email });
-      }
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe?.();
-    };
-  }, []);
-
   const login = useCallback(async ({ email, password }) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { ok: false, error: error.message };
-    return { ok: true };
+    if (email && password) {
+      const fakeUser = { id: 'u1', name: email.split('@')[0] || 'User', email };
+      setUser(fakeUser);
+      return { ok: true };
+    }
+    return { ok: false, error: 'Invalid credentials' };
   }, []);
 
   const signup = useCallback(async ({ name, email, password }) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { name } },
-    });
-    if (error) return { ok: false, error: error.message };
-    return { ok: true };
+    if (name && email && password) {
+      const fakeUser = { id: 'u1', name, email };
+      setUser(fakeUser);
+      return { ok: true };
+    }
+    return { ok: false, error: 'Fill all fields' };
   }, []);
 
-  const logout = useCallback(async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  }, []);
+  const logout = useCallback(() => setUser(null), []);
 
   const value = useMemo(() => ({ user, login, signup, logout }), [user, login, signup, logout]);
 

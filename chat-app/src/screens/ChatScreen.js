@@ -14,27 +14,29 @@ function MessageItem({ item, isSelf }) {
   );
 }
 
-export default function ChatScreen({ navigation }) {
-  const { messages, sendMessage } = useChat();
+export default function ChatScreen({ navigation, route }) {
+  const { getMessages, sendMessage } = useChat();
   const { user } = useAuth();
   const [text, setText] = useState('');
+  const { conversationId, title } = route?.params || {};
 
-  const data = useMemo(() => messages.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages]);
+  const data = useMemo(() => getMessages(conversationId).slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [getMessages, conversationId]);
 
   const handleSend = async () => {
-    await sendMessage(text);
+    await sendMessage(conversationId, text, user?.id);
     setText('');
   };
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: title || 'Chat',
       headerRight: () => (
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <Text style={{ color: theme.colors.primary, fontWeight: '700' }}>Profile</Text>
         </TouchableOpacity>
       ),
     });
-  }, [navigation]);
+  }, [navigation, title]);
 
   return (
     <View style={styles.container}>
