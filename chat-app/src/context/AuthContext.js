@@ -6,7 +6,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   const login = useCallback(async ({ email, password }) => {
-    // Fake auth: accept any non-empty credentials
     if (email && password) {
       const fakeUser = { id: 'u1', name: email.split('@')[0] || 'User', email };
       setUser(fakeUser);

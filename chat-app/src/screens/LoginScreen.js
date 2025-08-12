@@ -15,6 +15,8 @@ export default function LoginScreen({ navigation }) {
     setLoading(false);
     if (!res.ok) {
       Alert.alert('Login failed', res.error || 'Please try again');
+    } else {
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     }
   };
 
