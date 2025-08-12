@@ -21,8 +21,8 @@ export default function ChatScreen({ navigation }) {
 
   const data = useMemo(() => messages.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages]);
 
-  const handleSend = () => {
-    sendMessage(text, user?.id);
+  const handleSend = async () => {
+    await sendMessage(text);
     setText('');
   };
 

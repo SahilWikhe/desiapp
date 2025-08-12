@@ -1,20 +1,49 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from './AuthContext';
 
 const ChatContext = createContext(null);
 
 export function ChatProvider({ children }) {
-  const [messages, setMessages] = useState([
-    { id: 'm1', text: 'Welcome to the chat!', createdAt: new Date().toISOString(), userId: 'system' },
-  ]);
+  const [messages, setMessages] = useState([]);
+  const { user } = useAuth();
 
-  const sendMessage = useCallback((text, userId) => {
-    const trimmed = text?.trim();
-    if (!trimmed) return;
-    setMessages(prev => [
-      ...prev,
-      { id: String(prev.length + 1), text: trimmed, createdAt: new Date().toISOString(), userId },
-    ]);
+  useEffect(() => {
+    const load = async () => {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, content, sender_id, created_at')
+        .order('created_at', { ascending: true })
+        .limit(200);
+      if (!error && data) {
+        setMessages(
+          data.map(m => ({ id: m.id, text: m.content, createdAt: m.created_at, userId: m.sender_id }))
+        );
+      }
+    };
+    load();
+
+    const channel = supabase
+      .channel('public:messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        const m = payload.new;
+        setMessages(prev => [
+          ...prev,
+          { id: m.id, text: m.content, createdAt: m.created_at, userId: m.sender_id },
+        ]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
+  const sendMessage = useCallback(async (text) => {
+    const trimmed = text?.trim();
+    if (!trimmed || !user?.id) return;
+    await supabase.from('messages').insert({ content: trimmed, sender_id: user.id });
+  }, [user?.id]);
 
   const value = useMemo(() => ({ messages, sendMessage }), [messages, sendMessage]);
 
