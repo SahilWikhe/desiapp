@@ -16,8 +16,6 @@ export default function SignupScreen({ navigation }) {
     setLoading(false);
     if (!res.ok) {
       Alert.alert('Signup failed', res.error || 'Please try again');
-    } else {
-      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     }
   };
 

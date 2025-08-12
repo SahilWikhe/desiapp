@@ -13,14 +13,20 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSContactsUsageDescription": "This app uses your contacts to find friends who are also on the app."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/desiapp.webp",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.READ_CONTACTS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
