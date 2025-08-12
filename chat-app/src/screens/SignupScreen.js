@@ -17,7 +17,7 @@ export default function SignupScreen({ navigation }) {
     if (!res.ok) {
       Alert.alert('Signup failed', res.error || 'Please try again');
     }
-  }; 
+  };
 
   return (
     <View style={styles.container}>
