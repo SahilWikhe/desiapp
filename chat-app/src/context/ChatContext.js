@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const ChatContext = createContext(null);
 
@@ -17,6 +17,28 @@ export function ChatProvider({ children }) {
       { id: 'm2', text: 'How can we help you today?', createdAt: new Date().toISOString(), userId: 'system' },
     ],
   });
+
+  const [presenceByUserId, setPresenceByUserId] = useState({
+    system: 'online',
+    'user-aisha': 'online',
+    'user-rohan': 'away',
+    'user-sofia': 'online',
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPresenceByUserId((prev) => {
+        const next = { ...prev };
+        Object.keys(next).forEach((key) => {
+          if (key === 'system') return;
+          const states = ['online', 'away', 'offline'];
+          next[key] = states[Math.floor(Math.random() * states.length)];
+        });
+        return next;
+      });
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getMessages = useCallback((conversationId) => {
     return messagesByConversationId[conversationId] || [];
@@ -51,7 +73,9 @@ export function ChatProvider({ children }) {
     conversations,
     getMessages,
     sendMessage,
-  }), [conversations, getMessages, sendMessage]);
+    presenceByUserId,
+    isUserOnline: (userId) => presenceByUserId[userId] === 'online',
+  }), [conversations, getMessages, sendMessage, presenceByUserId]);
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

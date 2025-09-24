@@ -1,21 +1,35 @@
 import React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ChatProvider } from './src/context/ChatContext';
+import { CommunityProvider } from './src/context/CommunityContext';
 import LoginScreen from './src/screens/LoginScreen';
 import SignupScreen from './src/screens/SignupScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import RequestsScreen from './src/screens/RequestsScreen';
+import CommunitiesScreen from './src/screens/CommunitiesScreen';
+import CommunityExploreScreen from './src/screens/CommunityExploreScreen';
+import CommunityDetailScreen from './src/screens/CommunityDetailScreen';
+import CreateCommunityScreen from './src/screens/CreateCommunityScreen';
 import { theme } from './src/theme/theme';
 
 const Stack = createNativeStackNavigator();
 
 function RootNavigator() {
-  const { user } = useAuth();
+  const { user, initializing } = useAuth();
+
+  if (initializing) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer
@@ -49,6 +63,42 @@ function RootNavigator() {
               }}
             />
             <Stack.Screen
+              name="Communities"
+              component={CommunitiesScreen}
+              options={{
+                headerTitle: 'Communities',
+                headerStyle: { backgroundColor: theme.colors.background },
+                headerTintColor: theme.colors.primary,
+              }}
+            />
+            <Stack.Screen
+              name="CommunityExplore"
+              component={CommunityExploreScreen}
+              options={{
+                headerTitle: 'Discover communities',
+                headerStyle: { backgroundColor: theme.colors.background },
+                headerTintColor: theme.colors.primary,
+              }}
+            />
+            <Stack.Screen
+              name="CommunityDetail"
+              component={CommunityDetailScreen}
+              options={{
+                headerTitle: 'Community',
+                headerStyle: { backgroundColor: theme.colors.background },
+                headerTintColor: theme.colors.primary,
+              }}
+            />
+            <Stack.Screen
+              name="CreateCommunity"
+              component={CreateCommunityScreen}
+              options={{
+                headerTitle: 'Create community',
+                headerStyle: { backgroundColor: theme.colors.background },
+                headerTintColor: theme.colors.primary,
+              }}
+            />
+            <Stack.Screen
               name="Requests"
               component={RequestsScreen}
               options={{
@@ -75,7 +125,6 @@ function RootNavigator() {
                 headerTintColor: theme.colors.primary,
               }}
             />
-            
           </>
         )}
       </Stack.Navigator>
@@ -87,9 +136,11 @@ function RootNavigator() {
 export default function App() {
   return (
     <AuthProvider>
-      <ChatProvider>
-        <RootNavigator />
-      </ChatProvider>
+      <CommunityProvider>
+        <ChatProvider>
+          <RootNavigator />
+        </ChatProvider>
+      </CommunityProvider>
     </AuthProvider>
   );
 }

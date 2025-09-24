@@ -1,20 +1,12 @@
-import { supabase, SUPABASE_PUBLIC_URL, SUPABASE_PUBLIC_ANON_KEY } from './supabase';
+import { matchContacts } from './mockBackend';
 
-export async function matchContactsByPhone(numbers) {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData.session?.access_token || '';
-
-  const res = await fetch(`${SUPABASE_PUBLIC_URL}/functions/v1/match-contacts`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      apikey: SUPABASE_PUBLIC_ANON_KEY,
-    },
-    body: JSON.stringify({ numbers }),
-  });
-  if (!res.ok) return { matches: [] };
-  return res.json();
+export async function matchContactsByPhone(numbers, viewerId) {
+  try {
+    const result = await matchContacts(numbers, viewerId);
+    return result || { matches: [] };
+  } catch (error) {
+    console.warn('matchContactsByPhone failed', error);
+    return { matches: [] };
+  }
 }
-
 
