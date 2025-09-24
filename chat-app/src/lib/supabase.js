@@ -15,4 +15,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   },
 });
 
+export const SUPABASE_PUBLIC_URL = SUPABASE_URL;
+export const SUPABASE_PUBLIC_ANON_KEY = SUPABASE_ANON_KEY;
+
 
