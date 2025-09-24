@@ -1,11 +1,12 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme as NavigationDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ChatProvider } from './src/context/ChatContext';
 import { CommunityProvider } from './src/context/CommunityContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import LoginScreen from './src/screens/LoginScreen';
 import SignupScreen from './src/screens/SignupScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
@@ -16,12 +17,26 @@ import CommunitiesScreen from './src/screens/CommunitiesScreen';
 import CommunityExploreScreen from './src/screens/CommunityExploreScreen';
 import CommunityDetailScreen from './src/screens/CommunityDetailScreen';
 import CreateCommunityScreen from './src/screens/CreateCommunityScreen';
-import { theme } from './src/theme/theme';
-
 const Stack = createNativeStackNavigator();
 
 function RootNavigator() {
   const { user, initializing } = useAuth();
+  const { theme, colorScheme } = useTheme();
+
+  const navigationTheme = React.useMemo(() => {
+    const base = colorScheme === 'dark' ? NavigationDarkTheme : DefaultTheme;
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        primary: theme.colors.primary,
+        background: theme.colors.background,
+        text: theme.colors.text,
+        border: theme.colors.border,
+        card: theme.colors.surface,
+      },
+    };
+  }, [colorScheme, theme]);
 
   if (initializing) {
     return (
@@ -32,19 +47,7 @@ function RootNavigator() {
   }
 
   return (
-    <NavigationContainer
-      theme={{
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
-          primary: theme.colors.primary,
-          background: theme.colors.background,
-          text: theme.colors.text,
-          border: theme.colors.border,
-          card: theme.colors.background,
-        },
-      }}
-    >
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator>
         {!user ? (
           <>
@@ -128,19 +131,21 @@ function RootNavigator() {
           </>
         )}
       </Stack.Navigator>
-      <StatusBar style="auto" />
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </NavigationContainer>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <CommunityProvider>
-        <ChatProvider>
-          <RootNavigator />
-        </ChatProvider>
-      </CommunityProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CommunityProvider>
+          <ChatProvider>
+            <RootNavigator />
+          </ChatProvider>
+        </CommunityProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

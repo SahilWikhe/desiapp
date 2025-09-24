@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useCommunity } from '../context/CommunityContext';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function CommunityExploreScreen() {
   const {
@@ -19,6 +19,8 @@ export default function CommunityExploreScreen() {
     requestJoin,
     loadCommunityDetails,
   } = useCommunity();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     refreshCommunities();
@@ -82,28 +84,30 @@ export default function CommunityExploreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
-  title: { fontSize: 22, fontWeight: '700', marginBottom: 16 },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    marginBottom: 12,
-  },
-  name: { fontSize: 18, fontWeight: '700', marginBottom: 4 },
-  meta: { color: theme.colors.textMuted, marginBottom: 8 },
-  description: { color: theme.colors.textMuted, marginBottom: 16 },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end' },
-  primaryBtn: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  primaryBtnText: { color: 'white', fontWeight: '700' },
-  disabledBtn: { backgroundColor: theme.colors.border },
-  pendingText: { marginTop: 12, color: theme.colors.textMuted },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
+    title: { fontSize: 22, fontWeight: '700', marginBottom: 16, color: theme.colors.text },
+    card: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 12,
+    },
+    name: { fontSize: 18, fontWeight: '700', marginBottom: 4, color: theme.colors.text },
+    meta: { color: theme.colors.textMuted, marginBottom: 8 },
+    description: { color: theme.colors.textMuted, marginBottom: 16 },
+    actions: { flexDirection: 'row', justifyContent: 'flex-end' },
+    primaryBtn: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+    },
+    primaryBtnText: { color: theme.colors.onPrimary, fontWeight: '700' },
+    disabledBtn: { backgroundColor: theme.colors.border },
+    pendingText: { marginTop: 12, color: theme.colors.textMuted },
+  });
+}

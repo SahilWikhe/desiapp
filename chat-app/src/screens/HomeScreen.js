@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Image, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { useCommunity } from '../context/CommunityContext';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 import { getNormalizedPhones } from '../lib/contacts';
 import { matchContactsByPhone } from '../lib/matchContacts';
 import { searchProfilesByName, sendContactRequest } from '../lib/requests';
@@ -19,6 +19,8 @@ export default function HomeScreen({ navigation }) {
   const [contactMatches, setContactMatches] = useState([]);
   const [peopleResults, setPeopleResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,7 +90,7 @@ export default function HomeScreen({ navigation }) {
   }, [joinedCommunities, loadCommunityDetails]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <TextInput
         style={styles.search}
         placeholder="Search people or chats"
@@ -110,16 +112,16 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.email}>{user?.email}</Text>
         </View>
         <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('Requests')}>
-          <Ionicons name="notifications-outline" size={22} color="#fff" />
+          <Ionicons name="notifications-outline" size={22} color={theme.colors.onPrimary} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.quickRow}>
-        <TouchableOpacity style={[styles.quickBtn, { backgroundColor: theme.colors.primary }]} onPress={() => navigation.navigate('Communities')}>
-          <Text style={styles.quickBtnText}>Communities</Text>
+        <TouchableOpacity style={[styles.quickBtn, styles.quickBtnPrimary]} onPress={() => navigation.navigate('Communities')}>
+          <Text style={styles.quickBtnPrimaryText}>Communities</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.quickBtn, styles.quickBtnOutline, { marginRight: 0 }]}
+          style={[styles.quickBtn, styles.quickBtnOutline, styles.quickBtnTrailing]}
           onPress={() => navigation.navigate('CreateCommunity')}>
           <Text style={styles.quickBtnOutlineText}>Create community</Text>
         </TouchableOpacity>
@@ -166,6 +168,7 @@ export default function HomeScreen({ navigation }) {
             )}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             contentContainerStyle={{ paddingBottom: 12 }}
+            scrollEnabled={false}
           />
         </>
       ) : (
@@ -199,6 +202,7 @@ export default function HomeScreen({ navigation }) {
             )}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             contentContainerStyle={{ paddingBottom: 12 }}
+            scrollEnabled={false}
           />
         </>
       )}
@@ -283,96 +287,110 @@ export default function HomeScreen({ navigation }) {
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={{ paddingBottom: 24 }}
+        scrollEnabled={false}
       />
-    </View>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: theme.colors.primaryLight,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    marginBottom: 16,
-  },
-  avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: 'white', borderWidth: 2, borderColor: theme.colors.primary, marginRight: 12 },
-  avatarImg: { width: 56, height: 56, borderRadius: 28, marginRight: 12, borderWidth: 2, borderColor: theme.colors.primary },
-  welcome: { color: theme.colors.textMuted, fontSize: 12 },
-  name: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
-  email: { color: theme.colors.textMuted, fontSize: 12 },
-  search: {
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    backgroundColor: 'white',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-    color: theme.colors.text,
-  },
-  profileBtn: { backgroundColor: theme.colors.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
-  profileBtnText: { color: 'white', fontWeight: '700' },
-  iconBtn: { backgroundColor: theme.colors.primary, width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  quickRow: { flexDirection: 'row', marginBottom: 16 },
-  quickBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginRight: 12 },
-  quickBtnText: { color: 'white', fontWeight: '700' },
-  quickBtnOutline: { backgroundColor: 'white', borderWidth: 1, borderColor: theme.colors.primary },
-  quickBtnOutlineText: { color: theme.colors.primary, fontWeight: '700' },
-
-  sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
-  sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  linkText: { color: theme.colors.primary, fontWeight: '700' },
-  chatItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 8 },
-  chatAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primaryLight,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    marginRight: 12,
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
-    padding: 4,
-  },
-  chatTitle: { fontSize: 16, fontWeight: '700' },
-  chatSubtitle: { color: theme.colors.textMuted, marginTop: 2 },
-  chatTime: { color: theme.colors.textMuted, marginLeft: 8 },
-  separator: { height: 1, backgroundColor: theme.colors.border },
-  communityCard: {
-    width: 200,
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    backgroundColor: 'white',
-  },
-  communityName: { fontSize: 16, fontWeight: '700' },
-  communityMeta: { color: theme.colors.textMuted, marginTop: 4 },
-  communityDescription: { color: theme.colors.textMuted, marginTop: 6 },
-  spotlightCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    marginBottom: 12,
-  },
-  spotlightCommunity: { fontSize: 16, fontWeight: '700' },
-  spotlightMembers: { color: theme.colors.textMuted, marginTop: 4 },
-  spotlightEvent: { color: theme.colors.textMuted, marginTop: 6 },
-  presenceDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'white',
-  },
-  dotOnline: { backgroundColor: '#22c55e' },
-  dotAway: { backgroundColor: '#fbbf24' },
-  dotOffline: { backgroundColor: '#d1d5db' },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    scrollContent: { padding: 16, paddingBottom: 48 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 12,
+      borderRadius: 12,
+      backgroundColor: theme.colors.surfaceMuted,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 16,
+    },
+    avatar: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+      marginRight: 12,
+    },
+    avatarImg: { width: 56, height: 56, borderRadius: 28, marginRight: 12, borderWidth: 2, borderColor: theme.colors.primary },
+    welcome: { color: theme.colors.textMuted, fontSize: 12 },
+    name: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
+    email: { color: theme.colors.textMuted, fontSize: 12 },
+    search: {
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      backgroundColor: theme.colors.inputBackground,
+      borderRadius: 999,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      marginBottom: 12,
+      color: theme.colors.text,
+    },
+    profileBtn: { backgroundColor: theme.colors.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
+    profileBtnText: { color: theme.colors.onPrimary, fontWeight: '700' },
+    iconBtn: { backgroundColor: theme.colors.primary, width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+    quickRow: { flexDirection: 'row', marginBottom: 16 },
+    quickBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginRight: 12 },
+    quickBtnPrimary: { backgroundColor: theme.colors.primary },
+    quickBtnPrimaryText: { color: theme.colors.onPrimary, fontWeight: '700' },
+    quickBtnOutline: { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.primary },
+    quickBtnOutlineText: { color: theme.colors.primary, fontWeight: '700' },
+    quickBtnTrailing: { marginRight: 0 },
+    sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8, color: theme.colors.text },
+    sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+    linkText: { color: theme.colors.primary, fontWeight: '700' },
+    chatItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 8 },
+    chatAvatar: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.colors.surfaceMuted,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      marginRight: 12,
+      alignItems: 'flex-end',
+      justifyContent: 'flex-end',
+      padding: 4,
+    },
+    chatTitle: { fontSize: 16, fontWeight: '700', color: theme.colors.text },
+    chatSubtitle: { color: theme.colors.textMuted, marginTop: 2 },
+    chatTime: { color: theme.colors.textMuted, marginLeft: 8 },
+    separator: { height: 1, backgroundColor: theme.colors.border },
+    communityCard: {
+      width: 200,
+      borderWidth: 1,
+      borderRadius: 12,
+      padding: 12,
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.border,
+    },
+    communityName: { fontSize: 16, fontWeight: '700', color: theme.colors.text },
+    communityMeta: { color: theme.colors.textMuted, marginTop: 4 },
+    communityDescription: { color: theme.colors.textMuted, marginTop: 6 },
+    spotlightCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 12,
+    },
+    spotlightCommunity: { fontSize: 16, fontWeight: '700', color: theme.colors.text },
+    spotlightMembers: { color: theme.colors.textMuted, marginTop: 4 },
+    spotlightEvent: { color: theme.colors.textMuted, marginTop: 6 },
+    presenceDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      borderWidth: 1,
+      borderColor: theme.colors.background,
+    },
+    dotOnline: { backgroundColor: '#22c55e' },
+    dotAway: { backgroundColor: '#fbbf24' },
+    dotOffline: { backgroundColor: '#d1d5db' },
+  });
+}

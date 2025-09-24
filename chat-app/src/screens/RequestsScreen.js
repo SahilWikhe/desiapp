@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,10 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import { theme } from '../theme/theme';
 import { useAuth } from '../context/AuthContext';
 import { listMyRequests, respondToRequest } from '../lib/requests';
 import { useCommunity } from '../context/CommunityContext';
+import { useTheme } from '../context/ThemeContext';
 
 function RequestRow({ label, status, onAccept, onDecline }) {
   const showActions = status === 'pending' && onAccept && onDecline;
@@ -54,6 +54,8 @@ export default function RequestsScreen() {
   const [incoming, setIncoming] = useState([]);
   const [outgoing, setOutgoing] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const load = useCallback(async () => {
     if (!user?.id) return;
@@ -172,42 +174,44 @@ export default function RequestsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  card: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: 'white',
-    padding: 12,
-    marginBottom: 12,
-  },
-  itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primaryLight,
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-  },
-  name: { fontSize: 16, fontWeight: '600', flexShrink: 1 },
-  actionBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginLeft: 8 },
-  acceptBtn: { backgroundColor: '#22c55e' },
-  declineBtn: { backgroundColor: '#ef4444' },
-  actionText: { color: '#fff', fontWeight: '700' },
-  emptyText: { color: theme.colors.textMuted },
-  metaText: { color: theme.colors.textMuted, marginBottom: 8 },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    alignSelf: 'center',
-  },
-  badgeAccepted: { backgroundColor: 'rgba(34, 197, 94, 0.15)' },
-  badgeDeclined: { backgroundColor: 'rgba(239, 68, 68, 0.15)' },
-  badgePending: { backgroundColor: 'rgba(59, 130, 246, 0.15)' },
-  badgeText: { textTransform: 'capitalize', fontWeight: '700', color: theme.colors.text },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
+    sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12, color: theme.colors.text },
+    card: {
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.surface,
+      padding: 12,
+      marginBottom: 12,
+    },
+    itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
+    avatar: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.colors.surfaceMuted,
+      marginRight: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+    },
+    name: { fontSize: 16, fontWeight: '600', flexShrink: 1, color: theme.colors.text },
+    actionBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginLeft: 8 },
+    acceptBtn: { backgroundColor: '#22c55e' },
+    declineBtn: { backgroundColor: '#ef4444' },
+    actionText: { color: '#FFFFFF', fontWeight: '700' },
+    emptyText: { color: theme.colors.textMuted },
+    metaText: { color: theme.colors.textMuted, marginBottom: 8 },
+    badge: {
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      alignSelf: 'center',
+    },
+    badgeAccepted: { backgroundColor: 'rgba(34, 197, 94, 0.15)' },
+    badgeDeclined: { backgroundColor: 'rgba(239, 68, 68, 0.15)' },
+    badgePending: { backgroundColor: 'rgba(59, 130, 246, 0.15)' },
+    badgeText: { textTransform: 'capitalize', fontWeight: '700', color: theme.colors.text },
+  });
+}

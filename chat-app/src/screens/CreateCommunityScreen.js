@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useCommunity } from '../context/CommunityContext';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function CreateCommunityScreen() {
   const navigation = useNavigation();
@@ -11,6 +11,8 @@ export default function CreateCommunityScreen() {
   const [description, setDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -40,6 +42,7 @@ export default function CreateCommunityScreen() {
         placeholder="Community name"
         value={name}
         onChangeText={setName}
+        placeholderTextColor={theme.colors.textMuted}
       />
       <TextInput
         style={[styles.input, { height: 120 }]}
@@ -47,6 +50,7 @@ export default function CreateCommunityScreen() {
         value={description}
         onChangeText={setDescription}
         multiline
+        placeholderTextColor={theme.colors.textMuted}
       />
       <TouchableOpacity style={styles.toggleRow} onPress={() => setIsPrivate((prev) => !prev)}>
         <View style={[styles.checkbox, isPrivate && styles.checkboxChecked]} />
@@ -59,34 +63,37 @@ export default function CreateCommunityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
-  title: { fontSize: 24, fontWeight: '800', marginBottom: 20 },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
-    backgroundColor: 'white',
-  },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  checkboxChecked: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  toggleText: { color: theme.colors.text },
-  submitBtn: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  submitText: { color: 'white', fontWeight: '700' },
-});
-
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
+    title: { fontSize: 24, fontWeight: '800', marginBottom: 20, color: theme.colors.text },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 16,
+      backgroundColor: theme.colors.inputBackground,
+      color: theme.colors.text,
+    },
+    toggleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      borderRadius: 6,
+      marginRight: 12,
+      backgroundColor: theme.colors.surface,
+    },
+    checkboxChecked: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+    toggleText: { color: theme.colors.text },
+    submitBtn: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    submitText: { color: theme.colors.onPrimary, fontWeight: '700' },
+  });
+}

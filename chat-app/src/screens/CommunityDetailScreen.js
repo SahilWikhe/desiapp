@@ -11,28 +11,13 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useCommunity } from '../context/CommunityContext';
 import { useAuth } from '../context/AuthContext';
-import { theme } from '../theme/theme';
-
-function Section({ title, actionLabel, onPressAction, children }) {
-  return (
-    <View style={{ marginTop: 24 }}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{title}</Text>
-        {actionLabel && onPressAction ? (
-          <TouchableOpacity onPress={onPressAction}>
-            <Text style={styles.sectionAction}>{actionLabel}</Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-      {children}
-    </View>
-  );
-}
+import { useTheme } from '../context/ThemeContext';
 
 export default function CommunityDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const { user } = useAuth();
+  const { theme } = useTheme();
   const communityId = route.params?.communityId;
   const {
     joinedCommunities,
@@ -50,6 +35,20 @@ export default function CommunityDetailScreen() {
     rsvpEvent,
     refreshCommunities,
   } = useCommunity();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const Section = ({ title, actionLabel, onPressAction, children }) => (
+    <View style={{ marginTop: 24 }}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {actionLabel && onPressAction ? (
+          <TouchableOpacity onPress={onPressAction}>
+            <Text style={styles.sectionAction}>{actionLabel}</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+      {children}
+    </View>
+  );
 
   const [showThreadForm, setShowThreadForm] = useState(false);
   const [threadName, setThreadName] = useState('');
@@ -373,126 +372,131 @@ export default function CommunityDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
-  hero: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-  },
-  heroTitle: { fontSize: 24, fontWeight: '800' },
-  heroMeta: { color: theme.colors.textMuted, marginTop: 6 },
-  heroDescription: { color: theme.colors.textMuted, marginTop: 12 },
-  heroActions: { flexDirection: 'row', marginTop: 16 },
-  heroBtn: { flex: 1, paddingVertical: 12, borderRadius: 999, alignItems: 'center', marginRight: 12 },
-  heroBtnPrimary: { backgroundColor: theme.colors.primary },
-  heroBtnSecondary: { borderWidth: 1, borderColor: theme.colors.border, backgroundColor: 'white' },
-  heroBtnTextPrimary: { color: 'white', fontWeight: '700' },
-  heroBtnTextSecondary: { color: theme.colors.text, fontWeight: '700' },
-  formCard: {
-    marginTop: 16,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  formTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: 'white',
-  },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    borderRadius: 4,
-    marginRight: 10,
-  },
-  checkboxChecked: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-  toggleText: { color: theme.colors.text },
-  submitBtn: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  submitBtnText: { color: 'white', fontWeight: '700' },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionTitle: { fontSize: 20, fontWeight: '700' },
-  sectionAction: { color: theme.colors.primary, fontWeight: '700' },
-  emptyText: { color: theme.colors.textMuted, marginTop: 8 },
-  threadRow: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    marginTop: 12,
-  },
-  threadMeta: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  threadName: { fontSize: 18, fontWeight: '700', marginRight: 8 },
-  threadBadge: {
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    color: theme.colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  threadDescription: { color: theme.colors.textMuted },
-  threadFooter: { marginTop: 8, color: theme.colors.textMuted, fontSize: 12 },
-  memberRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
-  avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.colors.primaryLight,
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-  },
-  memberName: { fontWeight: '700' },
-  memberRole: { color: theme.colors.textMuted },
-  adminCard: {
-    marginTop: 16,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  adminTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
-  requestRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  requestName: { fontWeight: '700' },
-  requestMeta: { color: theme.colors.textMuted },
-  badgeBtn: {
-    borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    marginLeft: 8,
-  },
-  acceptBtn: { backgroundColor: '#22c55e' },
-  declineBtn: { backgroundColor: '#ef4444' },
-  badgeBtnText: { color: 'white', fontWeight: '700' },
-  eventCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    marginTop: 12,
-  },
-  eventTitle: { fontSize: 18, fontWeight: '700' },
-  eventMeta: { color: theme.colors.textMuted, marginTop: 4 },
-  eventDescription: { color: theme.colors.textMuted, marginTop: 8 },
-  eventActions: { flexDirection: 'row', marginTop: 12 },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
+    hero: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 16,
+      padding: 20,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+    },
+    heroTitle: { fontSize: 24, fontWeight: '800', color: theme.colors.text },
+    heroMeta: { color: theme.colors.textMuted, marginTop: 6 },
+    heroDescription: { color: theme.colors.textMuted, marginTop: 12 },
+    heroActions: { flexDirection: 'row', marginTop: 16 },
+    heroBtn: { flex: 1, paddingVertical: 12, borderRadius: 999, alignItems: 'center', marginRight: 12 },
+    heroBtnPrimary: { backgroundColor: theme.colors.primary },
+    heroBtnSecondary: { borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
+    heroBtnTextPrimary: { color: theme.colors.onPrimary, fontWeight: '700' },
+    heroBtnTextSecondary: { color: theme.colors.text, fontWeight: '700' },
+    formCard: {
+      marginTop: 16,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    formTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12, color: theme.colors.text },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      borderRadius: 10,
+      padding: 12,
+      marginBottom: 12,
+      backgroundColor: theme.colors.inputBackground,
+      color: theme.colors.text,
+    },
+    toggleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+    checkbox: {
+      width: 20,
+      height: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      borderRadius: 4,
+      marginRight: 10,
+      backgroundColor: theme.colors.surface,
+    },
+    checkboxChecked: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+    toggleText: { color: theme.colors.text },
+    submitBtn: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    submitBtnText: { color: theme.colors.onPrimary, fontWeight: '700' },
+    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    sectionTitle: { fontSize: 20, fontWeight: '700', color: theme.colors.text },
+    sectionAction: { color: theme.colors.primary, fontWeight: '700' },
+    emptyText: { color: theme.colors.textMuted, marginTop: 8 },
+    threadRow: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginTop: 12,
+    },
+    threadMeta: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+    threadName: { fontSize: 18, fontWeight: '700', marginRight: 8, color: theme.colors.text },
+    threadBadge: {
+      backgroundColor: 'rgba(59, 130, 246, 0.15)',
+      color: theme.colors.primary,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    threadDescription: { color: theme.colors.textMuted },
+    threadFooter: { marginTop: 8, color: theme.colors.textMuted, fontSize: 12 },
+    memberRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+    avatarPlaceholder: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: theme.colors.surfaceMuted,
+      marginRight: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+    },
+    memberName: { fontWeight: '700', color: theme.colors.text },
+    memberRole: { color: theme.colors.textMuted },
+    adminCard: {
+      marginTop: 16,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    adminTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8, color: theme.colors.text },
+    requestRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    requestName: { fontWeight: '700', color: theme.colors.text },
+    requestMeta: { color: theme.colors.textMuted },
+    badgeBtn: {
+      borderRadius: 999,
+      paddingVertical: 6,
+      paddingHorizontal: 14,
+      marginLeft: 8,
+    },
+    acceptBtn: { backgroundColor: '#22c55e' },
+    declineBtn: { backgroundColor: '#ef4444' },
+    badgeBtnText: { color: '#FFFFFF', fontWeight: '700' },
+    eventCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginTop: 12,
+    },
+    eventTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
+    eventMeta: { color: theme.colors.textMuted, marginTop: 4 },
+    eventDescription: { color: theme.colors.textMuted, marginTop: 8 },
+    eventActions: { flexDirection: 'row', marginTop: 12 },
+  });
+}

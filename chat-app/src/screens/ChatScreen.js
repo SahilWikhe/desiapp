@@ -16,23 +16,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 import { useCommunity } from '../context/CommunityContext';
-import { theme } from '../theme/theme';
-
-function MessageItem({ item, isSelf, showAuthor }) {
-  return (
-    <View style={[styles.messageRow, isSelf ? styles.rowSelf : styles.rowOther]}>
-      <View style={[styles.bubble, isSelf ? styles.bubbleSelf : styles.bubbleOther]}>
-        {showAuthor && !isSelf && item.user?.name ? (
-          <Text style={styles.author}>{item.user.name}</Text>
-        ) : null}
-        <Text style={[styles.messageText, isSelf && { color: 'white' }]}>{item.text}</Text>
-        <Text style={[styles.time, isSelf && styles.timeSelf]}>
-          {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Text>
-      </View>
-    </View>
-  );
-}
+import { useTheme } from '../context/ThemeContext';
 
 export default function ChatScreen({ navigation, route }) {
   const { getMessages, sendMessage } = useChat();
@@ -46,11 +30,27 @@ export default function ChatScreen({ navigation, route }) {
     joinedCommunities,
     discoverCommunities,
   } = useCommunity();
+  const { theme } = useTheme();
   const [text, setText] = useState('');
   const { conversationId, title, kind } = route?.params || {};
   const headerHeight = useHeaderHeight();
   const listRef = useRef(null);
   const [threadMeta, setThreadMeta] = useState(null);
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const MessageItem = ({ item, isSelf, showAuthor }) => (
+    <View style={[styles.messageRow, isSelf ? styles.rowSelf : styles.rowOther]}>
+      <View style={[styles.bubble, isSelf ? styles.bubbleSelf : styles.bubbleOther]}>
+        {showAuthor && !isSelf && item.user?.name ? (
+          <Text style={styles.author}>{item.user.name}</Text>
+        ) : null}
+        <Text style={[styles.messageText, isSelf && styles.messageTextSelf]}>{item.text}</Text>
+        <Text style={[styles.time, isSelf && styles.timeSelf]}>
+          {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+    </View>
+  );
 
   // newest first for inverted list
   const directMessages = useMemo(
@@ -187,43 +187,52 @@ export default function ChatScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
-  flex1: { flex: 1 },
-  messageRow: { marginBottom: 8, flexDirection: 'row' },
-  rowSelf: { justifyContent: 'flex-end' },
-  rowOther: { justifyContent: 'flex-start' },
-  bubble: { maxWidth: '78%', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
-  bubbleSelf: { backgroundColor: theme.colors.primary, borderBottomRightRadius: 6 },
-  bubbleOther: { backgroundColor: theme.colors.bubbleOther, borderBottomLeftRadius: 6 },
-  messageText: { color: '#333', fontSize: 16 },
-  author: { color: theme.colors.primary, fontWeight: '700', marginBottom: 4 },
-  time: { fontSize: 10, color: '#777', marginTop: 4, alignSelf: 'flex-end' },
-  timeSelf: { color: 'rgba(255,255,255,0.85)' },
-  threadHeaderCard: {
-    borderBottomWidth: 1,
-    borderColor: theme.colors.border,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    paddingTop: 4,
-    backgroundColor: theme.colors.background,
-  },
-  threadHeaderTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
-  threadHeaderSubtitle: { color: theme.colors.textMuted, marginTop: 4 },
-  threadHeaderDescription: { color: theme.colors.textMuted, marginTop: 6 },
-  inputRow: {
-    flexDirection: 'row', padding: 8, borderTopWidth: 1, borderColor: theme.colors.border, alignItems: 'flex-end',
-  },
-  textInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    backgroundColor: theme.colors.primaryLight,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginRight: 8,
-    maxHeight: 120,
-  },
-  sendButton: { backgroundColor: theme.colors.primary, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 10, justifyContent: 'center' },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    flex1: { flex: 1 },
+    messageRow: { marginBottom: 8, flexDirection: 'row' },
+    rowSelf: { justifyContent: 'flex-end' },
+    rowOther: { justifyContent: 'flex-start' },
+    bubble: { maxWidth: '78%', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
+    bubbleSelf: { backgroundColor: theme.colors.primary, borderBottomRightRadius: 6 },
+    bubbleOther: { backgroundColor: theme.colors.bubbleOther, borderBottomLeftRadius: 6 },
+    messageText: { color: theme.colors.text, fontSize: 16 },
+    messageTextSelf: { color: theme.colors.onPrimary },
+    author: { color: theme.colors.primary, fontWeight: '700', marginBottom: 4 },
+    time: { fontSize: 10, color: theme.colors.textMuted, marginTop: 4, alignSelf: 'flex-end' },
+    timeSelf: { color: 'rgba(255,255,255,0.85)' },
+    threadHeaderCard: {
+      borderBottomWidth: 1,
+      borderColor: theme.colors.border,
+      paddingHorizontal: 16,
+      paddingBottom: 12,
+      paddingTop: 4,
+      backgroundColor: theme.colors.surface,
+    },
+    threadHeaderTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
+    threadHeaderSubtitle: { color: theme.colors.textMuted, marginTop: 4 },
+    threadHeaderDescription: { color: theme.colors.textMuted, marginTop: 6 },
+    inputRow: {
+      flexDirection: 'row',
+      padding: 8,
+      borderTopWidth: 1,
+      borderColor: theme.colors.border,
+      alignItems: 'flex-end',
+      backgroundColor: theme.colors.surface,
+    },
+    textInput: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      backgroundColor: theme.colors.inputBackground,
+      borderRadius: 20,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      marginRight: 8,
+      maxHeight: 120,
+      color: theme.colors.text,
+    },
+    sendButton: { backgroundColor: theme.colors.primary, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 10, justifyContent: 'center' },
+  });
+}

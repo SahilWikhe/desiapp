@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useCommunity } from '../context/CommunityContext';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function CommunitiesScreen() {
   const navigation = useNavigation();
@@ -21,6 +21,8 @@ export default function CommunitiesScreen() {
     refreshCommunities,
     loadCommunityDetails,
   } = useCommunity();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     joinedCommunities.forEach((community) => {
@@ -81,7 +83,7 @@ export default function CommunitiesScreen() {
 
       <View style={styles.actionsRow}>
         <TouchableOpacity
-          style={[styles.secondaryBtn, { backgroundColor: theme.colors.primary }]}
+          style={[styles.secondaryBtn, styles.secondaryBtnPrimary]}
           onPress={() => navigation.navigate('CreateCommunity')}>
           <Text style={styles.secondaryBtnText}>Create community</Text>
         </TouchableOpacity>
@@ -132,73 +134,76 @@ export default function CommunitiesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
-  title: { fontSize: 22, fontWeight: '700', marginBottom: 16 },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderLeftWidth: 4,
-  },
-  communityName: { fontSize: 18, fontWeight: '700', marginBottom: 4 },
-  communityMeta: { color: theme.colors.textMuted, marginBottom: 8 },
-  communityDescription: { color: theme.colors.textMuted },
-  pendingBadge: {
-    marginTop: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    fontWeight: '600',
-    color: theme.colors.text,
-  },
-  emptyState: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  emptyTitle: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  emptySubtitle: { color: theme.colors.textMuted, marginBottom: 16 },
-  primaryBtn: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  primaryBtnText: { color: 'white', fontWeight: '700' },
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 },
-  secondaryBtn: { flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: 'center', marginRight: 8 },
-  secondaryBtnText: { color: 'white', fontWeight: '700' },
-  secondaryOutline: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
-  },
-  secondaryOutlineText: { color: theme.colors.primary, fontWeight: '700' },
-  discoveryCard: { borderLeftWidth: 1 },
-  eventCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  eventCommunity: { color: theme.colors.primary, fontWeight: '700', marginBottom: 4 },
-  eventTitle: { fontSize: 18, fontWeight: '700', marginBottom: 4 },
-  eventMeta: { color: theme.colors.textMuted, marginBottom: 8 },
-  eventDescription: { color: theme.colors.textMuted },
-});
-
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background, padding: 16 },
+    title: { fontSize: 22, fontWeight: '700', marginBottom: 16, color: theme.colors.text },
+    card: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderLeftWidth: 4,
+    },
+    communityName: { fontSize: 18, fontWeight: '700', marginBottom: 4, color: theme.colors.text },
+    communityMeta: { color: theme.colors.textMuted, marginBottom: 8 },
+    communityDescription: { color: theme.colors.textMuted },
+    pendingBadge: {
+      marginTop: 12,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      backgroundColor: 'rgba(59, 130, 246, 0.15)',
+      alignSelf: 'flex-start',
+      borderRadius: 999,
+      fontWeight: '600',
+      color: theme.colors.text,
+    },
+    emptyState: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    emptyTitle: { fontSize: 18, fontWeight: '700', marginBottom: 8, color: theme.colors.text },
+    emptySubtitle: { color: theme.colors.textMuted, marginBottom: 16 },
+    primaryBtn: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    primaryBtnText: { color: theme.colors.onPrimary, fontWeight: '700' },
+    actionsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 },
+    secondaryBtn: { flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: 'center', marginRight: 8 },
+    secondaryBtnPrimary: { backgroundColor: theme.colors.primary },
+    secondaryBtnText: { color: theme.colors.onPrimary, fontWeight: '700' },
+    secondaryOutline: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 8,
+      backgroundColor: theme.colors.surface,
+    },
+    secondaryOutlineText: { color: theme.colors.primary, fontWeight: '700' },
+    discoveryCard: { borderLeftWidth: 1 },
+    eventCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    eventCommunity: { color: theme.colors.primary, fontWeight: '700', marginBottom: 4 },
+    eventTitle: { fontSize: 18, fontWeight: '700', marginBottom: 4, color: theme.colors.text },
+    eventMeta: { color: theme.colors.textMuted, marginBottom: 8 },
+    eventDescription: { color: theme.colors.textMuted },
+  });
+}

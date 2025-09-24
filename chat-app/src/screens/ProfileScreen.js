@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Image, Switch } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function ProfileScreen() {
   const { user, logout, setAvatarUri, updatePhone, updateProfileDetails } = useAuth();
+  const { theme, colorScheme, toggleScheme } = useTheme();
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [interestsText, setInterestsText] = useState((user?.interests || []).join(', '));
   const [saving, setSaving] = useState(false);
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     setName(user?.name || '');
@@ -69,11 +71,21 @@ export default function ProfileScreen() {
       </TouchableOpacity>
       <Text style={styles.name}>{user?.name}</Text>
       <Text style={styles.email}>{user?.email}</Text>
+      <View style={styles.toggleRow}>
+        <Text style={styles.toggleLabel}>Dark mode</Text>
+        <Switch
+          value={colorScheme === 'dark'}
+          onValueChange={toggleScheme}
+          trackColor={{ true: theme.colors.primary, false: theme.colors.border }}
+          thumbColor={colorScheme === 'dark' ? theme.colors.onPrimary : theme.colors.primary}
+        />
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Display name"
         value={name}
         onChangeText={setName}
+        placeholderTextColor={theme.colors.textMuted}
       />
       <TextInput
         style={styles.input}
@@ -81,6 +93,7 @@ export default function ProfileScreen() {
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
+        placeholderTextColor={theme.colors.textMuted}
       />
       <TextInput
         style={[styles.input, { height: 100 }]}
@@ -88,12 +101,14 @@ export default function ProfileScreen() {
         value={bio}
         onChangeText={setBio}
         multiline
+        placeholderTextColor={theme.colors.textMuted}
       />
       <TextInput
         style={styles.input}
         placeholder="Interests (comma separated)"
         value={interestsText}
         onChangeText={setInterestsText}
+        placeholderTextColor={theme.colors.textMuted}
       />
       <TouchableOpacity style={styles.button} onPress={saveProfile} disabled={saving}>
         <Text style={styles.buttonText}>{saving ? 'Saving...' : 'Save profile'}</Text>
@@ -105,29 +120,34 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center' },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: theme.colors.primaryLight,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-  },
-  avatarImg: { width: 96, height: 96, borderRadius: 48, marginBottom: 16, borderWidth: 2, borderColor: theme.colors.primary },
-  name: { fontSize: 24, fontWeight: '700' },
-  email: { color: theme.colors.textMuted, marginTop: 4 },
-  button: { backgroundColor: theme.colors.primary, padding: 12, borderRadius: 8, marginTop: 24, width: '60%' },
-  buttonText: { color: 'white', textAlign: 'center', fontWeight: '700' },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 16,
-    width: '60%',
-  },
-});
+function createStyles(theme) {
+  return StyleSheet.create({
+    container: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.background },
+    avatar: {
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+      backgroundColor: theme.colors.surfaceMuted,
+      marginBottom: 16,
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+    },
+    avatarImg: { width: 96, height: 96, borderRadius: 48, marginBottom: 16, borderWidth: 2, borderColor: theme.colors.primary },
+    name: { fontSize: 24, fontWeight: '700', color: theme.colors.text },
+    email: { color: theme.colors.textMuted, marginTop: 4 },
+    toggleRow: { flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 8 },
+    toggleLabel: { color: theme.colors.text, fontWeight: '600', marginRight: 12 },
+    button: { backgroundColor: theme.colors.primary, padding: 12, borderRadius: 8, marginTop: 24, width: '60%' },
+    buttonText: { color: theme.colors.onPrimary, textAlign: 'center', fontWeight: '700' },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.colors.inputBorder,
+      backgroundColor: theme.colors.inputBackground,
+      borderRadius: 8,
+      padding: 12,
+      marginTop: 16,
+      width: '60%',
+      color: theme.colors.text,
+    },
+  });
+}
